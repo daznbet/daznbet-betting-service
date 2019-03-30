@@ -1,0 +1,51 @@
+liveGames:
+   handler: src/liveGames.handler
+   events:
+     - http:
+         path: '/games/live'
+         method: get
+         cors:
+            origin: '*'
+
+getUserFavoritePlayers:
+   handler: src/getUserFavoritePlayers.handler
+   events:
+     - http:
+         path: '/games/{gameId}/favorite-players'
+         method: get
+         request: 
+          parameters: 
+             paths:
+               gameId: true
+         cors:
+            origin: '*'
+            headers:
+              - X-user-id
+
+addUserFavoritePlayers:
+   handler: src/addUserFavoritePlayers.handler
+   events:
+     - http:
+         path: '/games/{gameId}/favorite-players'
+         method: post
+         request: 
+          parameters: 
+             paths:
+               gameId: true
+         cors:
+            origin: '*'
+            headers:
+              - X-user-id
+
+updateGameBets:
+   handler: src/updateGameBets.handler
+   events:
+     - http:
+         path: '/games/{gameId}/score'
+         method: post
+         request: 
+          parameters: 
+             paths:
+               gameId: true
+         cors:
+            origin: '*'

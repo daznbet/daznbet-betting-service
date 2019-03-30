@@ -1,0 +1,22 @@
+custom:
+ stage: ${opt:stage, "dev"}
+ env: ${file(./env.yml):${self:custom.stage}}
+
+service: daznbet-betting-service
+
+provider:
+ name: aws
+ runtime: nodejs8.10
+ region: sa-east-1
+ environment: ${self:custom.env}
+ iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: "arn:aws:dynamodb:us-east-1:*:*"
+
+functions: ${file(./functions.yml)}
+
+plugins:
+ - serverless-dynamodb-local
+ - serverless-offline

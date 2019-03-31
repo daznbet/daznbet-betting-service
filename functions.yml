@@ -13,8 +13,8 @@ getUserFavoritePlayers:
      - http:
          path: '/games/{gameId}/favorite-players'
          method: get
-         request: 
-          parameters: 
+         request:
+          parameters:
              paths:
                gameId: true
          cors:
@@ -28,8 +28,8 @@ addUserFavoritePlayers:
      - http:
          path: '/games/{gameId}/favorite-players'
          method: post
-         request: 
-          parameters: 
+         request:
+          parameters:
              paths:
                gameId: true
          cors:
@@ -40,12 +40,6 @@ addUserFavoritePlayers:
 updateGameBets:
    handler: src/updateGameBets.handler
    events:
-     - http:
-         path: '/games/{gameId}/score'
-         method: post
-         request: 
-          parameters: 
-             paths:
-               gameId: true
-         cors:
-            origin: '*'
+      - sqs:
+         arn: arn:aws:sqs:us-east-1:374047294805:daznbet-ranking
+         batchSize: 1

@@ -35,16 +35,16 @@ const validateParams = (event)  => {
 
     let params = {
         TableName: process.env.DYNAMO_SCORE_BY_GAME_TABLE,
-        Item: {
+        Key: {
             "gameId": gameId,
-            "range": userId
+            "userId": userId
         },
-        UpdateExpression: "ADD #attrName = :newFavPlayers",
+        UpdateExpression: "SET #attrName = :newFavPlayers",
         ExpressionAttributeNames : {
             "#attrName" : "players"
         },
         ExpressionAttributeValues: {
-            ':newFavPlayers': { "L": players }
+            ':newFavPlayers': players
         },
     };
 
@@ -53,7 +53,7 @@ const validateParams = (event)  => {
 
 const getUserFavoritePlayer = (params) => {
     return new Promise((resolve, reject) => { 
-        dbClient.put(params)
+        dbClient.update(params)
             .promise()
             .then((data) => {
                 response.body = JSON.stringify(data);

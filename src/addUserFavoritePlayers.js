@@ -15,7 +15,8 @@ const hasGameId = (pathParameters) => {
 }
 
 const hasUserHeader = (headers) => {
-    return 'X-user-id' in headers && typeof headers['X-user-id'] === 'string';
+    const foundUser = headers['X-user-id']
+    return !!foundUser && typeof foundUser === 'string';
 }
 
 const hasPlayer = (body) => {
@@ -24,20 +25,25 @@ const hasPlayer = (body) => {
 
 const validateParams = (event)  => {
     const body = JSON.parse(event.body);
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@2", event);
 
-    if (!hasUserHeader(event.headers) && !hasGameId(event.pathParameters) && hasPlayers(body)) {
+    if (!hasUserHeader(event.headers) && !hasGameId(event.pathParameters) && hasPlayer(body)) {
         return null;
     }
 
-    let userId = event.headers['X-user-id'];
+    let userId = event.headers['x-user-id'] || event.headers['X-user-id'];
+    userId = Array.isArray(userId) ? userId[0] : userId
     let gameId = event.pathParameters.gameId;
     let players = body.players;
+    if(!gameId || !players || !userId) {
+        throw new Error(gameId, players, userId)
+    }
 
     let params = {
         TableName: process.env.DYNAMO_SCORE_BY_GAME_TABLE,
         Key: {
-            "gameId": gameId,
-            "userId": userId
+            "gameId": gameId.toString(),
+            "userId": userId.toString()
         },
         UpdateExpression: "SET #attrName = :newFavPlayers",
         ExpressionAttributeNames : {
@@ -56,25 +62,27 @@ const getUserFavoritePlayer = (params) => {
         dbClient.update(params)
             .promise()
             .then((data) => {
-                response.body = JSON.stringify(data);
-                response.data = params;
                 resolve(response);
             }).catch((err) => {
                 response.statusCode = err.statusCode || 503;
                 response.body = JSON.stringify(err.message);
-                resolve(response);
+                reject(response);
             });
     });
 };
 
 module.exports.handler = async(event) => {
-    let params = validateParams(event);
+    try {
+        let params = validateParams(event);
 
-    if (params === null) {
-        response.status = 401;
-        response.body = JSON.stringify('Invalid request parameters');
-        return response;
+        if (params === null) {
+            response.status = 401;
+            response.body = JSON.stringify('Invalid request parameters');
+            return response;
+        }
+
+        return await getUserFavoritePlayer(params);
+    } catch(err) {
+        console.log(err)
     }
-
-    return await getUserFavoritePlayer(params);
 };

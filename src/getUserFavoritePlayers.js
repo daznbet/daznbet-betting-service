@@ -14,12 +14,14 @@ const hasGameId = (pathParameters) => {
     return !!pathParameters && pathParameters.gameId && typeof pathParameters.gameId === 'string';
 }
 
-const hasUserHeader = (headers) => {
-    return 'X-user-id' in headers && typeof headers['X-user-id'] === 'string';
+const hasUserHeader = (event) => {
+    const headers = event.headers || {}
+    const xUserId = headers['X-user-id']
+    return !!xUserId;
 }
 
 const validateParams = (event)  => {
-    if (!hasUserHeader(event.headers) && !hasGameId(event.pathParameters)) {
+    if (!hasUserHeader(event) && !hasGameId(event.pathParameters)) {
         return null;
     }
 

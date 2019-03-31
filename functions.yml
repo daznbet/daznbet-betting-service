@@ -14,13 +14,14 @@ getUserFavoritePlayers:
          path: '/games/{gameId}/favorite-players'
          method: get
          request:
-          parameters:
-             paths:
-               gameId: true
+            parameters:
+               paths:
+                  gameId: true
          cors:
             origin: '*'
             headers:
               - X-user-id
+
 
 addUserFavoritePlayers:
    handler: src/addUserFavoritePlayers.handler
@@ -28,14 +29,12 @@ addUserFavoritePlayers:
      - http:
          path: '/games/{gameId}/favorite-players'
          method: post
-         request:
-          parameters:
-             paths:
-               gameId: true
          cors:
             origin: '*'
-            headers:
-              - X-user-id
+         request:
+            parameters:
+               paths:
+                  gameId: true
 
 updateGameBets:
    handler: src/updateGameBets.handler

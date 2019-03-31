@@ -40,12 +40,47 @@ const currentGameMock = {
     ]
 };
 
+const response = {
+    statusCode: 200,
+    headers: {
+        'Access-Control-Allow-Origin': '*'
+    },
+    body: ''
+}
+
+const getStartedTime = () => {
+    const params = {
+        TableName: process.env.DYNAMO_GAMES_TABLE,
+        Key: {
+            "id": "5"
+        }
+    };
+    
+    return new Promise((resolve, reject) => { 
+        dbClient.get(params)
+            .promise()
+            .then((data) => {
+                const streamingTime = getStreamingTime(data)
+                response.body = JSON.stringify({
+                    ...currentGameMock,
+                    streamingTime
+                });
+                resolve(response);
+            }).catch((err) => {
+                response.statusCode = err.statusCode || 503;
+                response.body = JSON.stringify(err.message);
+                resolve(response);
+            });
+    });
+} 
+
+const getStreamingTime = (data) => {
+    const now = Math.floor(new Date().getTime() / 1000);
+    const startedAt = !!data.Item.startedAt ? data.Item.startedAt : now;
+    
+    return now - startedAt;
+};
+
 module.exports.handler = async(event) => {
-    return {
-        statusCode: 200,
-        headers: {
-            'Access-Control-Allow-Origin': '*'
-        },
-        body: JSON.stringify(currentGameMock)
-    }
+    return await getStartedTime();
 };

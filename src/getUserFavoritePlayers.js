@@ -28,9 +28,9 @@ const validateParams = (event)  => {
 
     let params = {
         TableName: process.env.DYNAMO_SCORE_BY_GAME_TABLE,
-        Items: {
-            "id": gameId,
-            "range": userId
+        Key: {
+            "gameId": gameId,
+            "userId": userId
         }
     };
 
@@ -38,11 +38,11 @@ const validateParams = (event)  => {
 };
 
 const getUserFavoritePlayer = (params) => {
-    return await new Promise((resolve, reject) => { 
-        dbClient.scan(params)
+    return new Promise((resolve, reject) => { 
+        dbClient.get(params)
             .promise()
             .then((data) => {
-                response.body = JSON.stringify(data);
+                response.body = JSON.stringify(data.Item);
                 resolve(response);
             }).catch((err) => {
                 response.statusCode = err.statusCode || 503;
@@ -61,5 +61,5 @@ module.exports.handler = async(event) => {
         return response;
     }
 
-    return getUserFavoritePlayer(params);
+    return await getUserFavoritePlayer(params);
 };
